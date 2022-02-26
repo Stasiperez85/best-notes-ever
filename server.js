@@ -10,49 +10,69 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static('public'));
 
-const { notes } = require('./Develop/db/db.json');
+const notes = require('./Develop/db/db.json');
+const { v4: uuidv4 } = require('uuid');
 
 app.get('/api/notes', (req, res) => {
     res.json(notes);
 })
 
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, './public/index.html'));
+    res.sendFile(path.join(__dirname, '/public/index.html'));
 });
 
 app.get('/notes', (req, res) => {
-    res.sendFile(path.join(__dirname, './public/notes.html'));
+    res.sendFile(path.join(__dirname, '/public/notes.html'));
 });
 
 app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, './public/index.html'));
+    res.sendFile(path.join(__dirname, '/public/index.html'));
 });
 
 function createNewNote(body, notesArray) {
     const newNote = body;
+    if (!Array.isArray(notesArray))
+        notesArray = [];
+
+    if (notesArray.length === 0)
+        notesArray.push(0);
+
     notesArray.push(newNote);
     fs.writeFileSync(
         path.join(__dirname, './Develop/db/db.json'),
-        JSON.stringify({ newNote: notesArray }, null, 2)
+        JSON.stringify(notesArray, null, 2)
     );
     return newNote;
 }
 
-const validateNote = newNote => {
-    if (!newNote.title || typeof newNote.name !== 'string') {
-      return false;
-    }
-    if (!newNote.text || typeof newNote.name !== 'string') {
+function validateNote(newNote) {
+    if (!newNote.title || typeof newNote.title !== 'string') {
         return false;
-      }
+    }
+    if (!newNote.text || typeof newNote.text !== 'string') {
+        return false;
+    }
     return true;
-  }
+}
+
 
 app.post('/api/notes', (req, res) => {
-    // req.body is where our incoming content will be
     console.log(req.body);
-    res.json(req.body);
+    req.body.id = uuidv4();
+    console.log(req.body);
+    if (!validateNote(req.body)) {
+        return res.status(400).send('Add information to create your note.');
+    } else {
+        const newNote = createNewNote(req.body, notes);
+        res.json(newNote);
+    }
 });
+
+// app.delete('/api/notes', (req, res) => {
+//     deleteNote(req.params.id, notes);
+//     res.json(true);
+//     res.send('Got a DELETE request at /user')
+// });
 
 app.listen(PORT, () => {
     console.log(`API server now on port ${PORT}!`);
