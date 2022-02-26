@@ -28,6 +28,26 @@ app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, './public/index.html'));
 });
 
+function createNewNote(body, notesArray) {
+    const newNote = body;
+    notesArray.push(newNote);
+    fs.writeFileSync(
+        path.join(__dirname, './Develop/db/db.json'),
+        JSON.stringify({ newNote: notesArray }, null, 2)
+    );
+    return newNote;
+}
+
+const validateNote = newNote => {
+    if (!newNote.title || typeof newNote.name !== 'string') {
+      return false;
+    }
+    if (!newNote.text || typeof newNote.name !== 'string') {
+        return false;
+      }
+    return true;
+  }
+
 app.post('/api/notes', (req, res) => {
     // req.body is where our incoming content will be
     console.log(req.body);

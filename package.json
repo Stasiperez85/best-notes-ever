@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/Stasiperez85/best-notes-ever#readme",
   "dependencies": {
-    "express": "^4.17.3"
+    "express": "^4.17.3",
+    "uniqid": "^5.4.0"
   }
 }
